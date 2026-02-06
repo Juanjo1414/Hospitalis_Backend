@@ -3,11 +3,44 @@ import * as bcrypt from 'bcrypt';
 import { UsersService } from 'src/users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from './dto/login.dto';
+import { UnauthorizedException } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
   //Constructor que inyecta el UsersService
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
+
+  //Método para autenticar a un usuario
+  async login(loginDto: LoginDto) {
+    const { email, password } = loginDto;
+
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new UnauthorizedException('Credenciales Invalidas');
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Credenciales Invalidas');
+    }
+
+    const payload = {
+      sub: user['_id'],
+      email: user.email,
+      role: user.role,
+    };
+
+    const token = this.jwtService.sign(payload);
+
+    return {
+      access_token: token,
+    };
+  }
 
   //Método para registrar un nuevo usuario
   async register(registerDto: RegisterDto) {
