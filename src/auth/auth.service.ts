@@ -68,4 +68,16 @@ export class AuthService {
       userId: user['_id'],
     };
   }
+
+  async forgotPassword(email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new BadRequestException('Este correo ya existe, intente con otro');
+    }
+
+    // Aquí se implementaría la lógica para generar un token de recuperación y enviar el correo electrónico al usuario
+    return {
+      message: 'Correo de recuperación enviado exitosamente',
+    };
+  }
 }
