@@ -18,4 +18,9 @@ export class AuthController {
   async register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
+
+  @Post('forgot-password')
+  forgot(@Body('email') email: string) {
+    return this.authService.forgotPassword(email);
+  }
 }
