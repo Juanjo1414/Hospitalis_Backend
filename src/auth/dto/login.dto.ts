@@ -1,10 +1,11 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
-// DTO para el login de usuarios, con validaciones de correo electrónico y contraseña
 export class LoginDto {
   @IsEmail()
+  @Transform(({ value }) => value.trim().toLowerCase())
   email: string;
 
-  @IsNotEmpty()
+  @IsString()
   password: string;
 }

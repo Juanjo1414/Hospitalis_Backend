@@ -38,7 +38,7 @@ export class AuthService {
     const token = this.jwtService.sign(payload);
 
     return {
-      access_token: token,
+      accessToken: token,
     };
   }
 

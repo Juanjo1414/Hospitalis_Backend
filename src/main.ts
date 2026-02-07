@@ -5,6 +5,11 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       //Configuración global de validación
@@ -12,7 +17,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true, //Lanza un error si hay propiedades no definidas
     }),
   );
-  
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

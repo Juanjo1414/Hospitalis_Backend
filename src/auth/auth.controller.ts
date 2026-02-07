@@ -19,8 +19,11 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
+  // Endpoint para solicitar un restablecimiento de contraseña
   @Post('forgot-password')
   forgot(@Body('email') email: string) {
     return this.authService.forgotPassword(email);
   }
+
+  
 }

@@ -1,13 +1,15 @@
-import {IsEmail, IsNotEmpty, IsString, MinLength} from 'class-validator';
+import { IsEmail, IsString, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
 
-// DTO para el registro de usuarios, con validaciones de nombre completo, correo electrónico y contraseña
 export class RegisterDto {
-    @IsNotEmpty()
-    fullName: string;
+  @IsString()
+  fullName: string;
 
-    @IsEmail()
-    email: string;
+  @IsEmail()
+  @Transform(({ value }) => value.trim().toLowerCase())
+  email: string;
 
-    @MinLength(8)
-    password: string;
+  @IsString()
+  @MinLength(8)
+  password: string;
 }
