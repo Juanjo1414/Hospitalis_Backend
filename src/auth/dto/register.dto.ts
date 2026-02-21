@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class RegisterDto {
@@ -12,4 +12,9 @@ export class RegisterDto {
   @IsString()
   @MinLength(8)
   password: string;
+
+  // Especialidad médica — opcional en el registro
+  @IsOptional()
+  @IsString()
+  specialty?: string;
 }

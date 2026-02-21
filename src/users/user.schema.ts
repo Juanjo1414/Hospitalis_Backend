@@ -1,19 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-export type UserDocument = User & Document;  //Tipo de documento de Mongoose para el usuario
+export type UserDocument = User & Document;
 
-export enum UserRole {  //Definición de roles de usuario
+export enum UserRole {
   ADMIN = 'admin',
   MEDICO = 'medico',
 }
 
-@Schema({ timestamps: true })  //Decorador de esquema de Mongoose con marcas de tiempo
+@Schema({ timestamps: true })
 export class User {
   @Prop({ required: true })
   fullname: string;
 
-  @Prop({  //Propiedad de correo electrónico con validaciones
+  @Prop({
     required: true,
     unique: true,
     lowercase: true,
@@ -21,18 +21,22 @@ export class User {
   })
   email: string;
 
-  @Prop({ required: true }) //Propiedad de contraseña
+  @Prop({ required: true })
   password: string;
 
-  @Prop({  //Propiedad de rol con valores enumerados
+  //Nuevo campo: especialidad médica
+  @Prop({ default: '' })
+  specialty: string;
+
+  @Prop({
     type: String,
     enum: UserRole,
     default: UserRole.MEDICO,
   })
   role: UserRole;
 
-  @Prop({ default: true }) //Propiedad para estado activo/inactivo
+  @Prop({ default: true })
   isActive: boolean;
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);  //Creación del esquema de Mongoose a partir de la clase User
+export const UserSchema = SchemaFactory.createForClass(User);

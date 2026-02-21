@@ -1,81 +1,87 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from 'src/users/users.service';
 import { RegisterDto } from './dto/register.dto';
-import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
-import { UnauthorizedException } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
-  //Constructor que inyecta el UsersService
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
   ) {}
 
-  //Método para autenticar a un usuario
+  // Autenticar usuario — devuelve token + datos del médico para personalizar la UI
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
     const user = await this.usersService.findByEmail(email);
     if (!user) {
-      throw new UnauthorizedException('Credenciales Invalidas');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Credenciales Invalidas');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
 
     const payload = {
-      sub: user['_id'],
-      email: user.email,
-      role: user.role,
+      sub:       user['_id'],
+      email:     user.email,
+      fullName:  user.fullname,
+      specialty: user.specialty ?? '',
+      role:      user.role,
     };
 
     const token = this.jwtService.sign(payload);
 
+    // Devolvemos también el objeto user sin contraseña para que el frontend
+    // lo guarde en localStorage y personalice el Dashboard con datos reales
     return {
       accessToken: token,
+      user: {
+        fullName:  user.fullname,
+        email:     user.email,
+        specialty: user.specialty ?? '',
+        role:      user.role,
+      },
     };
   }
 
-  //Método para registrar un nuevo usuario
+  // Registrar nuevo médico
   async register(registerDto: RegisterDto) {
-    const { fullName, email, password } = registerDto;
+    const { fullName, email, password, specialty } = registerDto;
 
-    //Verificar si el usuario ya existe
     const existingUser = await this.usersService.findByEmail(email);
     if (existingUser) {
-      throw new BadRequestException('Credenciales Invalidas');
+      throw new BadRequestException('Ya existe un usuario con este correo');
     }
 
-    //Crear el usuario con la contraseña hasheada
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    //Crear el nuevo usuario en la base de datos
     const user = await this.usersService.create({
-      fullname: fullName,
+      fullname:  fullName,
       email,
-      password: hashedPassword,
+      password:  hashedPassword,
+      specialty: specialty ?? '',
     });
 
-    //Retornar una respuesta exitosa
     return {
       message: 'Usuario registrado exitosamente',
       userId: user['_id'],
     };
   }
 
+  // Solicitar restablecimiento de contraseña
   async forgotPassword(email: string) {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
-      throw new BadRequestException('Este correo ya existe, intente con otro');
+      // Por seguridad respondemos igual aunque el correo no exista
+      return { message: 'Si el correo existe, recibirás las instrucciones.' };
     }
 
-    // Aquí se implementaría la lógica para generar un token de recuperación y enviar el correo electrónico al usuario
+    // TODO Sprint 3: generar token y enviar email con Nodemailer/SendGrid
     return {
       message: 'Correo de recuperación enviado exitosamente',
     };
