@@ -6,31 +6,29 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PatientsModule } from './patients/patients.module';
+import { AppointmentsModule } from './appointment/appointment.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({  //Configuración global de variables de entorno
+    ConfigModule.forRoot({
       isGlobal: true,
     }),
 
-    MongooseModule.forRootAsync({  //Configuración asíncrona de Mongoose
+    MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const uri = configService.get<string>('MONGO_URI');
-
-        if (!uri) {  //Validación de la variable de entorno
+        const uri = configService.get<string>('MONGO_URI'); 
+        if (!uri) {
           throw new Error('MONGO_URI is not defined');
         }
-
-        return {
-          uri,
-        };
+        return { uri };
       },
     }),
 
     UsersModule,
     AuthModule,
-    PatientsModule,
+    PatientsModule,       
+    AppointmentsModule,   
   ],
   controllers: [AppController],
   providers: [AppService],
