@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PatientsModule } from './patients/patients.module';
 import { AppointmentsModule } from './appointment/appointment.module';
+import { MedicalRecordsModule } from './medical-records/medical-records.module';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { AppointmentsModule } from './appointment/appointment.module';
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const uri = configService.get<string>('MONGO_URI'); 
+        const uri = configService.get<string>('MONGO_URI');
         if (!uri) {
           throw new Error('MONGO_URI is not defined');
         }
@@ -27,10 +28,11 @@ import { AppointmentsModule } from './appointment/appointment.module';
 
     UsersModule,
     AuthModule,
-    PatientsModule,       
-    AppointmentsModule,   
+    PatientsModule,
+    AppointmentsModule,
+    MedicalRecordsModule,   
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers:   [AppService],
 })
 export class AppModule {}
