@@ -73,7 +73,7 @@ export class AppointmentsService {
     return appointment;
   }
 
-  // Actualizar cita (estado, notas, etc.)
+  // Actualizar cita
   async update(id: string, dto: UpdateAppointmentDto): Promise<Appointment> {
     const appointment = await this.appointmentModel.findByIdAndUpdate(
       id,
@@ -98,16 +98,21 @@ export class AppointmentsService {
     return { message: 'Cita eliminada exitosamente' };
   }
 
-  // Citas de hoy para el doctor (para el Dashboard)
-  async findTodayByDoctor(doctorId: string): Promise<Appointment[]> {
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    const end = new Date();
-    end.setHours(23, 59, 59, 999);
+  async findTodayByDoctor(_doctorId: string): Promise<Appointment[]> {
+    // String 'YYYY-MM-DD' de hoy en UTC (igual que como MongoDB guarda las fechas)
+    const now      = new Date();
+    const yyyy     = now.getUTCFullYear();
+    const mm       = String(now.getUTCMonth() + 1).padStart(2, '0');
+    const dd       = String(now.getUTCDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+
+    const start = new Date(`${todayStr}T00:00:00.000Z`);
+    const end   = new Date(`${todayStr}T23:59:59.999Z`);
 
     return this.appointmentModel
-      .find({ doctorId, date: { $gte: start, $lte: end } })
+      .find({ date: { $gte: start, $lte: end } })
       .populate('patientId', 'firstName lastName')
+      .populate('doctorId',  'fullname specialty')
       .sort({ startTime: 1 });
   }
 }
