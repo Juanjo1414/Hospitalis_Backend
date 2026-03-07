@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
@@ -39,21 +43,25 @@ export class UsersService {
     isActive?: boolean;
     page?: number;
     limit?: number;
-  }): Promise<{ data: UserListItem[]; total: number; page: number; limit: number }> {
-    const page  = query?.page  ?? 1;
+  }): Promise<{
+    data: UserListItem[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const page = query?.page ?? 1;
     const limit = query?.limit ?? 10;
-    const skip  = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
     const filter: any = {};
     if (query?.role !== undefined && query.role !== '')
       filter.role = query.role;
-    if (query?.isActive !== undefined)
-      filter.isActive = query.isActive;
+    if (query?.isActive !== undefined) filter.isActive = query.isActive;
 
     const [data, total] = await Promise.all([
       this.userModel
         .find(filter)
-        .select('-password')           // nunca exponer el hash
+        .select('-password') // nunca exponer el hash
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 }),
@@ -71,13 +79,16 @@ export class UsersService {
   }
 
   // Actualizar usuario (nombre, rol, isActive, password opcional)
-  async update(id: string, dto: {
-    fullname?: string;
-    email?: string;
-    role?: UserRole;
-    isActive?: boolean;
-    password?: string;
-  }): Promise<UserListItem> {
+  async update(
+    id: string,
+    dto: {
+      fullname?: string;
+      email?: string;
+      role?: UserRole;
+      isActive?: boolean;
+      password?: string;
+    },
+  ): Promise<UserListItem> {
     // Si viene email nuevo, verificar que no exista ya
     if (dto.email) {
       const existing = await this.userModel.findOne({ email: dto.email });
@@ -93,7 +104,11 @@ export class UsersService {
     }
 
     const user = await this.userModel
-      .findByIdAndUpdate(id, { $set: updateData }, { new: true, runValidators: true })
+      .findByIdAndUpdate(
+        id,
+        { $set: updateData },
+        { new: true, runValidators: true },
+      )
       .select('-password');
 
     if (!user) throw new NotFoundException('Usuario no encontrado');
@@ -116,5 +131,12 @@ export class UsersService {
     const user = await this.userModel.findByIdAndDelete(id);
     if (!user) throw new NotFoundException('Usuario no encontrado');
     return { message: 'Usuario eliminado permanentemente' };
+  }
+
+  // --Metodo de Forgot Password para actualizar contraseña sin necesidad de hashear (solo lo llama AuthService)--
+  async updatePassword(id: string, hashedPassword: string): Promise<void> {
+    await this.userModel.findByIdAndUpdate(id, {
+      $set: { password: hashedPassword },
+    });
   }
 }
