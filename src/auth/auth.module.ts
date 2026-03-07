@@ -1,25 +1,39 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { UsersModule } from 'src/users/users.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { RolesGuard } from './roles/roles.guard';
+import { UsersModule } from '../users/users.module';
+import { User, UserSchema } from '../users/user.schema';
 
 @Module({
   imports: [
     UsersModule,
+    PassportModule,
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     JwtModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET'), // Clave secreta para firmar los tokens JWT
-        signOptions: {
-          expiresIn: config.get<number>('JWT_EXPIRES_IN') ?? 3600,  // Tiempo de expiración del token en segundos (1 hora por defecto)
-        },
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '24h' }, // tokens válidos por 24 horas
       }),
+      inject: [ConfigService],
     }),
   ],
-  providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    RolesGuard,   // registrado aquí para poder inyectarlo en otros módulos
+  ],
+  exports: [
+    AuthService,
+    JwtModule,
+    RolesGuard,   // exportado para que MedicalRecordsModule lo pueda usar
+  ],
 })
 export class AuthModule {}

@@ -8,79 +8,83 @@ import {
   Param,
   Query,
   UseGuards,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { MedicalRecordsService } from './medical-records.service';
 import { CreateMedicalRecordDto } from '../auth/dto/create-medical-record.dto';
 import { UpdateMedicalRecordDto } from '../auth/dto/update-medical-record.dto';
-import { RecordType } from './medical-record.schema';
+import { RolesGuard } from '../auth/roles/roles.guard';
+import { Roles } from '../auth/roles/roles.decorator';
+import { Role } from '../auth/roles/roles.enum';
 
-@UseGuards(AuthGuard('jwt'))
+// ─── Ambos guards se aplican a TODOS los endpoints del controller ───────────
+// AuthGuard('jwt') verifica que el token JWT sea válido
+// RolesGuard verifica que el rol del usuario sea el permitido
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('medical-records')
 export class MedicalRecordsController {
-  constructor(private readonly service: MedicalRecordsService) {}
+  constructor(private readonly medicalRecordsService: MedicalRecordsService) {}
 
-  // ── POST /medical-records ─────────────────────────────────
-  // Crear un nuevo registro clínico
+  // ── POST /medical-records ──────────────────────────────────────────────────
+  // Solo médicos pueden crear registros clínicos
   @Post()
-  @HttpCode(HttpStatus.CREATED)
-  create(@Body() dto: CreateMedicalRecordDto) {
-    return this.service.create(dto);
+  @Roles(Role.MEDICO, Role.ADMIN)
+  create(@Body() createMedicalRecordDto: CreateMedicalRecordDto) {
+    return this.medicalRecordsService.create(createMedicalRecordDto);
   }
 
-  // ── GET /medical-records/patient/:patientId ───────────────
-  // Historial clínico completo de un paciente (con filtros y paginación)
-  @Get('patient/:patientId')
+  // ── GET /medical-records/patient/:id ──────────────────────────────────────
+  // Historial médico del paciente con filtros opcionales (tipo, estado, rango de fechas)
+  @Get('patient/:id')
+  @Roles(Role.MEDICO, Role.ADMIN)
   findByPatient(
-    @Param('patientId') patientId: string,
-    @Query('type')   type?: RecordType,
+    @Param('id') patientId: string,
+    @Query('type') type?: string,
     @Query('status') status?: string,
-    @Query('from')   from?: string,
-    @Query('to')     to?: string,
-    @Query('page')   page?: string,
-    @Query('limit')  limit?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
-    return this.service.findByPatient(patientId, {
-      type,
+    return this.medicalRecordsService.findByPatient(patientId, {
+      type: type as any,
       status,
       from,
       to,
-      page:  page  ? parseInt(page,  10) : 1,
-      limit: limit ? parseInt(limit, 10) : 20,
+      page: page ? parseInt(page) : 1,
+      limit: limit ? parseInt(limit) : 10,
     });
   }
 
-  // ── GET /medical-records/patient/:patientId/summary ───────
-  // Resumen clínico del paciente (totales, condiciones activas, último registro)
-  @Get('patient/:patientId/summary')
-  getSummary(@Param('patientId') patientId: string) {
-    return this.service.getSummary(patientId);
+  // ── GET /medical-records/patient/:id/summary ───────────────────────────────
+  @Get('patient/:id/summary')
+  @Roles(Role.MEDICO, Role.ADMIN)
+  getSummary(@Param('id') patientId: string) {
+    return this.medicalRecordsService.getSummary(patientId);
   }
 
-  // ── GET /medical-records/:id ──────────────────────────────
-  // Un registro específico con todos sus datos populados
+  // ── GET /medical-records/:id ───────────────────────────────────────────────
   @Get(':id')
+  @Roles(Role.MEDICO, Role.ADMIN)
   findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
+    return this.medicalRecordsService.findOne(id);
   }
 
-  // ── PATCH /medical-records/:id ────────────────────────────
-  // Actualización parcial de un registro
+  // ── PATCH /medical-records/:id ─────────────────────────────────────────────
   @Patch(':id')
+  @Roles(Role.MEDICO, Role.ADMIN)
   update(
     @Param('id') id: string,
-    @Body() dto: UpdateMedicalRecordDto,
+    @Body() updateMedicalRecordDto: UpdateMedicalRecordDto,
   ) {
-    return this.service.update(id, dto);
+    return this.medicalRecordsService.update(id, updateMedicalRecordDto);
   }
 
-  // ── DELETE /medical-records/:id ───────────────────────────
-  // Eliminar un registro clínico
+  // ── DELETE /medical-records/:id ────────────────────────────────────────────
+  // Solo admin puede eliminar registros clínicos
   @Delete(':id')
-  @HttpCode(HttpStatus.OK)
+  @Roles(Role.ADMIN)
   remove(@Param('id') id: string) {
-    return this.service.remove(id);
+    return this.medicalRecordsService.remove(id);
   }
 }
