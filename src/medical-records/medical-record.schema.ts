@@ -22,13 +22,13 @@ export enum RecordStatus {
 export class MedicalRecord {
   // ── Relaciones ──────────────────────────────────────────
   @Prop({ type: Types.ObjectId, ref: 'Patient', required: true })
-  patientId: Types.ObjectId;
+  patientId!: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  doctorId: Types.ObjectId;
+  doctorId!: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'Appointment', default: null })
-  appointmentId: Types.ObjectId | null;
+  appointmentId!: Types.ObjectId | null;
 
   // ── Clasificación ────────────────────────────────────────
   @Prop({
@@ -36,28 +36,28 @@ export class MedicalRecord {
     enum: RecordType,
     required: true,
   })
-  type: RecordType;
+  type!: RecordType;
 
   @Prop({
     type: String,
     enum: RecordStatus,
     default: RecordStatus.ACTIVE,
   })
-  status: RecordStatus;
+  status!: RecordStatus;
 
   // ── Contenido principal ──────────────────────────────────
   @Prop({ required: true, trim: true })
-  title: string;
+  title!: string;
 
   @Prop({ required: true, trim: true })
-  description: string;
+  description!: string;
 
   @Prop({ trim: true })
-  icdCode: string; // Código ICD-10 para diagnósticos
+  icdCode!: string; // Código ICD-10 para diagnósticos
 
   // ── Signos vitales (solo cuando type = vital_signs) ──────
   @Prop({ type: Object, default: null })
-  vitals: {
+  vitals!: {
     heartRate?: number;       // bpm
     bloodPressure?: string;   // "120/80"
     temperature?: number;     // °C
@@ -69,7 +69,7 @@ export class MedicalRecord {
 
   // ── Resultado de laboratorio ─────────────────────────────
   @Prop({ type: Object, default: null })
-  labResult: {
+  labResult!: {
     testName?: string;
     result?: string;
     unit?: string;
@@ -79,17 +79,17 @@ export class MedicalRecord {
 
   // ── Archivos adjuntos ────────────────────────────────────
   @Prop({ type: [String], default: [] })
-  attachments: string[]; // URLs de archivos/imágenes
+  attachments!: string[]; // URLs de archivos/imágenes
 
   // ── Metadatos ────────────────────────────────────────────
   @Prop({ default: Date.now })
-  recordDate: Date;
+  recordDate!: Date;
 
   @Prop({ trim: true })
-  notes: string; // Notas adicionales del médico
+  notes!: string; // Notas adicionales del médico
 
   @Prop({ type: [String], default: [] })
-  tags: string[]; // Etiquetas para búsqueda
+  tags!: string[]; // Etiquetas para búsqueda
 }
 
 export const MedicalRecordSchema = SchemaFactory.createForClass(MedicalRecord);

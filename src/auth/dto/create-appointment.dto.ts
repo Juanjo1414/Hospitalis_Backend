@@ -10,21 +10,21 @@ import { AppointmentStatus, AppointmentType } from '../../appointment/appointmen
 
 export class CreateAppointmentDto {
   @IsMongoId()
-  patientId: string;
+  patientId!: string;
 
   @IsMongoId()
-  doctorId: string;
+  doctorId!: string;
 
   @IsDateString()
-  date: string;
+  date!: string;
 
   @IsString()
   @Matches(/^([0-1]\d|2[0-3]):[0-5]\d$/, { message: 'startTime debe ser HH:MM' })
-  startTime: string;
+  startTime!: string;
 
   @IsString()
   @Matches(/^([0-1]\d|2[0-3]):[0-5]\d$/, { message: 'endTime debe ser HH:MM' })
-  endTime: string;
+  endTime!: string;
 
   @IsOptional()
   @IsEnum(AppointmentType)
@@ -35,7 +35,7 @@ export class CreateAppointmentDto {
   status?: AppointmentStatus;
 
   @IsString()
-  reason: string;
+  reason!: string;
 
   @IsOptional()
   @IsString()

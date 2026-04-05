@@ -78,14 +78,16 @@ export class UsersService {
     return user as unknown as UserListItem;
   }
 
-  // Actualizar usuario (nombre, rol, isActive, password opcional)
+  // Actualizar usuario (nombre, rol, isActive, password opcional y specialty)
   async update(
     id: string,
     dto: {
       fullname?: string;
       email?: string;
+      specialty?: string;
       role?: UserRole;
       isActive?: boolean;
+      currentPassword?: string;
       password?: string;
     },
   ): Promise<UserListItem> {
@@ -97,9 +99,21 @@ export class UsersService {
       }
     }
 
-    // Hashear password si se está actualizando
+    const currentUser = await this.userModel.findById(id);
+    if (!currentUser) throw new NotFoundException('Usuario no encontrado');
+
+    // Cambiar contraseña si es pedida
     const updateData: any = { ...dto };
+    delete updateData.currentPassword;
+
     if (dto.password) {
+      if (!dto.currentPassword) {
+         throw new ConflictException('Debes proporcionar la contraseña actual para cambiarla');
+      }
+      const isMatch = await bcrypt.compare(dto.currentPassword, currentUser.password);
+      if (!isMatch) {
+         throw new ConflictException('La contraseña actual es incorrecta');
+      }
       updateData.password = await bcrypt.hash(dto.password, 10);
     }
 

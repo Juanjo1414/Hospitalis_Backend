@@ -15,11 +15,11 @@ export class CreateMedicalRecordDto {
   // ── Relaciones ──────────────────────────────────────────
   @IsMongoId({ message: 'patientId must be a valid MongoDB ID' })
   @IsNotEmpty()
-  patientId: string;
+  patientId!: string;
 
   @IsMongoId({ message: 'doctorId must be a valid MongoDB ID' })
   @IsNotEmpty()
-  doctorId: string;
+  doctorId!: string;
 
   @IsOptional()
   @IsMongoId({ message: 'appointmentId must be a valid MongoDB ID' })
@@ -30,7 +30,7 @@ export class CreateMedicalRecordDto {
     message: `type must be one of: ${Object.values(RecordType).join(', ')}`,
   })
   @IsNotEmpty()
-  type: RecordType;
+  type!: RecordType;
 
   @IsOptional()
   @IsEnum(RecordStatus, {
@@ -42,12 +42,12 @@ export class CreateMedicalRecordDto {
   @IsString()
   @IsNotEmpty({ message: 'title is required' })
   @MaxLength(200)
-  title: string;
+  title!: string;
 
   @IsString()
   @IsNotEmpty({ message: 'description is required' })
   @MaxLength(5000)
-  description: string;
+  description!: string;
 
   @IsOptional()
   @IsString()
