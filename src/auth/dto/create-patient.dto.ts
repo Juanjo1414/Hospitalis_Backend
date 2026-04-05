@@ -11,20 +11,20 @@ import { PatientStatus, BloodType } from '../../patients/patient.schema';
 
 export class CreatePatientDto {
   @IsString()
-  firstName: string;
+  firstName!: string;
 
   @IsString()
-  lastName: string;
+  lastName!: string;
 
   @IsDateString()
-  dateOfBirth: string;
+  dateOfBirth!: string;
 
   @IsEnum(['male', 'female', 'other'])
-  gender: string;
+  gender!: string;
 
   @IsEmail()
   @Transform(({ value }) => value.trim().toLowerCase())
-  email: string;
+  email!: string;
 
   @IsOptional()
   @IsString()

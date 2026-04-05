@@ -21,46 +21,46 @@ export enum BloodType {
 export class Patient {
   // ── Identidad ──────────────────────────────────────────
   @Prop({ required: true, trim: true })
-  firstName: string;
+  firstName!: string;
 
   @Prop({ required: true, trim: true })
-  lastName: string;
+  lastName!: string;
 
   @Prop({ required: true })
-  dateOfBirth: Date;
+  dateOfBirth!: Date;
 
   @Prop({ required: true, enum: ['male', 'female', 'other'] })
-  gender: string;
+  gender!: string;
 
   // ── Contacto ───────────────────────────────────────────
   @Prop({ required: true, unique: true, lowercase: true, trim: true })
-  email: string;
+  email!: string;
 
   @Prop({ default: '' })
-  phone: string;
+  phone!: string;
 
   @Prop({ default: '' })
-  address: string;
+  address!: string;
 
   // ── Contacto de emergencia ─────────────────────────────
   @Prop({ default: '' })
-  emergencyContactName: string;
+  emergencyContactName!: string;
 
   @Prop({ default: '' })
-  emergencyContactPhone: string;
+  emergencyContactPhone!: string;
 
   // ── Perfil clínico ─────────────────────────────────────
   @Prop({ type: String, enum: BloodType, default: null })
-  bloodType: string;
+  bloodType!: string;
 
   @Prop({ type: [String], default: [] })
-  allergies: string[];
+  allergies!: string[];
 
   @Prop({ type: [String], default: [] })
-  chronicConditions: string[];
+  chronicConditions!: string[];
 
   @Prop({ default: '' })
-  notes: string;
+  notes!: string;
 
   // ── Estado ─────────────────────────────────────────────
   @Prop({
@@ -68,7 +68,7 @@ export class Patient {
     enum: PatientStatus,
     default: PatientStatus.ACTIVE,
   })
-  status: PatientStatus;
+  status!: PatientStatus;
 }
 
 export const PatientSchema = SchemaFactory.createForClass(Patient);

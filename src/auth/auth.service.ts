@@ -18,7 +18,7 @@ import * as crypto from 'crypto'; // módulo nativo de Node — genera UUIDs
 import * as nodemailer from 'nodemailer'; // envío de emails
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import {

@@ -1,6 +1,6 @@
 import {
   Controller, Get, Patch, Delete, Body, Param,
-  Query, UseGuards, Req, HttpCode, HttpStatus,
+  Query, UseGuards, Req, HttpCode, HttpStatus, ForbiddenException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from './users.service';
@@ -45,19 +45,35 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
-  // PATCH /users/:id — actualizar usuario (solo Admin)
+  // PATCH /users/:id — actualizar usuario (Admin o el propio usuario)
   @Patch(':id')
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MEDICO)
   update(
+    @Req() req: any,
     @Param('id') id: string,
     @Body() dto: {
       fullname?: string;
       email?: string;
+      specialty?: string;
       role?: UserRole;
       isActive?: boolean;
+      currentPassword?: string;
       password?: string;
     },
   ) {
+    const isAdmin = req.user.role === Role.ADMIN;
+    
+    // 1. Un usuario no admin solo puede editarse a sí mismo
+    if (!isAdmin && req.user.id !== id) {
+      throw new ForbiddenException("No tienes permiso para editar este perfil");
+    }
+
+    // 2. Un usuario no admin no puede cambiar su rol o estado activo
+    if (!isAdmin) {
+      delete dto.role;
+      delete dto.isActive;
+    }
+
     return this.usersService.update(id, dto);
   }
 

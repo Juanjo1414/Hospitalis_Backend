@@ -25,21 +25,21 @@ export enum AppointmentType {
 export class Appointment {
   // Relación con el paciente
   @Prop({ type: Types.ObjectId, ref: 'Patient', required: true })
-  patientId: Types.ObjectId;
+  patientId!: Types.ObjectId;
 
   // Relación con el doctor (User)
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  doctorId: Types.ObjectId;
+  doctorId!: Types.ObjectId;
 
   // Fecha y hora
   @Prop({ required: true })
-  date: Date;
+  date!: Date;
 
   @Prop({ required: true })
-  startTime: string;   // "09:00"
+  startTime!: string;   // "09:00"
 
   @Prop({ required: true })
-  endTime: string;     // "09:30"
+  endTime!: string;     // "09:30"
 
   // Tipo y estado
   @Prop({
@@ -47,26 +47,26 @@ export class Appointment {
     enum: AppointmentType,
     default: AppointmentType.CHECKUP,
   })
-  type: AppointmentType;
+  type!: AppointmentType;
 
   @Prop({
     type: String,
     enum: AppointmentStatus,
     default: AppointmentStatus.SCHEDULED,
   })
-  status: AppointmentStatus;
+  status!: AppointmentStatus;
 
   // Motivo de consulta
   @Prop({ required: true })
-  reason: string;
+  reason!: string;
 
   // Notas del doctor (se llenan en la consulta)
   @Prop({ default: '' })
-  notes: string;
+  notes!: string;
 
   // Sala / consultorio
   @Prop({ default: '' })
-  room: string;
+  room!: string;
 }
 
 export const AppointmentSchema = SchemaFactory.createForClass(Appointment);

@@ -11,7 +11,7 @@ export enum UserRole {
 @Schema({ timestamps: true })
 export class User {
   @Prop({ required: true })
-  fullname: string;
+  fullname!: string;
 
   @Prop({
     required: true,
@@ -19,24 +19,24 @@ export class User {
     lowercase: true,
     trim: true,
   })
-  email: string;
+  email!: string;
 
   @Prop({ required: true })
-  password: string;
+  password!: string;
 
   //Nuevo campo: especialidad médica
   @Prop({ default: '' })
-  specialty: string;
+  specialty!: string;
 
   @Prop({
     type: String,
     enum: UserRole,
     default: UserRole.MEDICO,
   })
-  role: UserRole;
+  role!: UserRole;
 
   @Prop({ default: true })
-  isActive: boolean;
+  isActive!: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
