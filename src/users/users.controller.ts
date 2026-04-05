@@ -17,13 +17,14 @@ export class UsersController {
   // GET /users/profile — perfil del usuario autenticado (cualquier rol)
   @Get('profile')
   @Roles(Role.ADMIN, Role.MEDICO)
-  getProfile(@Req() req: any) {
-    return req.user;
+  async getProfile(@Req() req: any) {
+    const userId = req.user.userId;
+    return this.usersService.findOne(userId);
   }
 
-  // GET /users — listar todos los usuarios (solo Admin)
+  // GET /users — listar todos los usuarios (Admin y Medico para buscar contactos)
   @Get()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MEDICO)
   findAll(
     @Query('role')     role?:     string,
     @Query('isActive') isActive?: string,
@@ -38,10 +39,17 @@ export class UsersController {
     });
   }
 
-  // GET /users/:id — obtener usuario por ID (solo Admin)
+  // GET /users/:id — obtener usuario por ID (Admin o propio usuario)
   @Get(':id')
-  @Roles(Role.ADMIN)
-  findOne(@Param('id') id: string) {
+  @Roles(Role.ADMIN, Role.MEDICO)
+  findOne(@Req() req: any, @Param('id') id: string) {
+    const isAdmin = req.user.role === Role.ADMIN;
+    // req.user.userId es inyectado por JwtStrategy
+    const userId = req.user.userId;
+    
+    if (!isAdmin && userId !== id) {
+      throw new ForbiddenException("No tienes permiso para ver este perfil");
+    }
     return this.usersService.findOne(id);
   }
 
@@ -63,8 +71,10 @@ export class UsersController {
   ) {
     const isAdmin = req.user.role === Role.ADMIN;
     
+    const userId = req.user.userId;
+    
     // 1. Un usuario no admin solo puede editarse a sí mismo
-    if (!isAdmin && req.user.id !== id) {
+    if (!isAdmin && userId !== id) {
       throw new ForbiddenException("No tienes permiso para editar este perfil");
     }
 

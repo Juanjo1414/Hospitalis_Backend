@@ -44,6 +44,8 @@ export class MessagesService {
     const conversationsMap = new Map<string, any>();
 
     for (const msg of messages) {
+      if (!msg.sender || !msg.receiver) continue; // Ignorar mensajes corruptos (remitentes eliminados o no encontrados)
+
       const otherUser = msg.sender._id.toString() === userId ? msg.receiver : msg.sender;
       const otherUserId = otherUser._id.toString();
 
@@ -80,7 +82,7 @@ export class MessagesService {
       { $set: { isRead: true } }
     );
 
-    return this.messageModel
+    const conversation = await this.messageModel
       .find({
         $or: [
           { sender: userObj, receiver: otherObj },
@@ -91,6 +93,8 @@ export class MessagesService {
       .populate('sender', 'fullname email _id')
       .populate('receiver', 'fullname email _id')
       .lean();
+
+    return conversation.filter((msg: any) => msg.sender && msg.receiver);
   }
 
   async markAsRead(messageId: string, userId: string) {
@@ -104,10 +108,20 @@ export class MessagesService {
   }
 
   async getUnreadCount(userId: string) {
-    const count = await this.messageModel.countDocuments({
+    const unreadMsgs = await this.messageModel.find({
       receiver: new Types.ObjectId(userId),
       isRead: false
-    });
+    }).populate('sender', '_id');
+    
+    let count = 0;
+    for (const msg of unreadMsgs) {
+      if (msg.sender) {
+        count++;
+      } else {
+        // Auto-heal: delete corrupted phantom messages
+        await this.messageModel.deleteOne({ _id: msg._id }).catch(() => {});
+      }
+    }
     return { count };
   }
 }

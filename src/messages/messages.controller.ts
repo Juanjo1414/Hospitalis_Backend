@@ -9,26 +9,26 @@ export class MessagesController {
 
   @Post()
   createMessage(@Req() req: any, @Body() dto: { receiverId: string; content: string }) {
-    return this.messagesService.createMessage(req.user.id, dto.receiverId, dto.content);
+    return this.messagesService.createMessage(req.user.userId, dto.receiverId, dto.content);
   }
 
   @Get('inbox')
   getInbox(@Req() req: any) {
-    return this.messagesService.getInbox(req.user.id);
+    return this.messagesService.getInbox(req.user.userId);
   }
 
   @Get('unread-count')
   getUnreadCount(@Req() req: any) {
-    return this.messagesService.getUnreadCount(req.user.id);
+    return this.messagesService.getUnreadCount(req.user.userId);
   }
 
   @Get('conversation/:userId')
   getConversation(@Req() req: any, @Param('userId') otherUserId: string) {
-    return this.messagesService.getConversation(req.user.id, otherUserId);
+    return this.messagesService.getConversation(req.user.userId, otherUserId);
   }
 
   @Patch(':id/read')
   markAsRead(@Req() req: any, @Param('id') messageId: string) {
-    return this.messagesService.markAsRead(messageId, req.user.id);
+    return this.messagesService.markAsRead(messageId, req.user.userId);
   }
 }
